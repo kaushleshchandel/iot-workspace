@@ -11,12 +11,15 @@
 #include <air_qaulity_sensors.h>
 #include <thingspeak.h>
 #include <ota.h>
-
+#include <mqtt.h>
 
 #define SW_VERSION  "1.0" //Change with every build
 #define HW_VERSION  "ESP32-AIR" //Change for hardware
 
 WiFiClient client;
+ 
+PubSubClient mqttclient(client);
+
 
 void setup()
 {
@@ -39,6 +42,7 @@ void setup()
 
   // Printing the ESP IP address
   Serial.println(WiFi.localIP());
+  init_mqtt( mqttclient, "1.0", "ESP");
 }
 
 void loop()
@@ -81,12 +85,7 @@ void loop()
     }
     else
     {
-      if (send_to_thingspeak_server(client, PM01Value, PM2_5Value, PM01Value))
-        Serial.println("data Sent to Server");
-        else
-        {
-          Serial.println("Data Not sent");
-        }
+       send_mqtt_int(mqttclient, "pm10", PM10Value);
         
     }
   }
