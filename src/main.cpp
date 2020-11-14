@@ -10,6 +10,11 @@
 #include <fx.h>
 #include <air_qaulity_sensors.h>
 #include <thingspeak.h>
+#include <ota.h>
+
+
+#define SW_VERSION  "1.0" //Change with every build
+#define HW_VERSION  "ESP32-AIR" //Change for hardware
 
 WiFiClient client;
 
@@ -30,6 +35,7 @@ void setup()
   }
   Serial.println("");
   Serial.println("WiFi connected");
+  checkUpdateFirmware(SW_VERSION, HW_VERSION);
 
   // Printing the ESP IP address
   Serial.println(WiFi.localIP());
