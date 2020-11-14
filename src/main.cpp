@@ -20,7 +20,6 @@ WiFiClient client;
  
 PubSubClient mqttclient(client);
 
-
 void setup()
 {
   Serial.begin(9600);
@@ -42,17 +41,16 @@ void setup()
 
   // Printing the ESP IP address
   Serial.println(WiFi.localIP());
-  init_mqtt( mqttclient, "1.0", "ESP");
+  
+  String sver = SW_VERSION;
+  String hver = HW_VERSION; 
+  init_mqtt( mqttclient, SW_VERSION, HW_VERSION);
 }
 
 void loop()
 {
 
-  if (read_pm_sensor(PM01Value, PM2_5Value, PM10Value))
-  {
-    //
-  }
-
+  read_pm_sensor(PM01Value, PM2_5Value, PM10Value);
   read_voc_sensor(AIRVOC);
 
 

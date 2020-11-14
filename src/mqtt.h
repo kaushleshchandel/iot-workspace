@@ -79,9 +79,8 @@ void callback(char* topic, byte* message, unsigned int length) {
     }
   }
 
-  else if (String(topic) == topicroot + "reset")
+  else if (String(topic) == topicroot + "restart" || String(topic) == topicroot + "reboot")
   {
-
     Serial.print("Rebooting by mqtt");
     ESP.restart();
   }
@@ -159,7 +158,6 @@ bool send_mqtt_int(PubSubClient& client, String topic, long value, bool retain )
       Serial.print(" MQTT Send Failure");
        
     }
-   
 
   } else
     Serial.print(" MQTT Not connected");
@@ -185,7 +183,6 @@ bool send_mqtt_string(PubSubClient& client, String topic, String value, bool ret
       Serial.print(" MQTT Send Failure");
  
     }
- 
 
   } else
     Serial.print(" MQTT Not connected");
