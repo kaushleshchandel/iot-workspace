@@ -76,7 +76,7 @@ void loop()
 
     Serial.print("VOC : ");
     Serial.print(AIRVOC);
-    Serial.println(" x");
+    Serial.println(" ppm");
     Serial.println();
 
     if (WiFi.isConnected() != true)
@@ -85,8 +85,10 @@ void loop()
     }
     else
     {
-       send_mqtt_int(mqttclient, "pm10", PM10Value);
-        
+       send_mqtt_int(mqttclient, "data/pm1.0", PM01Value, false);
+       send_mqtt_int(mqttclient, "data/pm2.5", PM2_5Value, false);
+       send_mqtt_int(mqttclient, "data/pm10.", PM10Value, false);
+       send_mqtt_int(mqttclient, "data/voc", AIRVOC, false); 
     }
   }
 }
