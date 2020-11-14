@@ -9,20 +9,22 @@
 #include <variables.h>
 #include <fx.h>
 #include <air_qaulity_sensors.h>
+#include <thingspeak.h>
 
 WiFiClient client;
-
 
 void setup()
 {
   Serial.begin(9600);
+  Serial1.begin(9600);
   delay(10);
   Serial.println();
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
+ 
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -31,16 +33,18 @@ void setup()
 
   // Printing the ESP IP address
   Serial.println(WiFi.localIP());
- 
 }
 
 void loop()
 {
- 
-  if (read_pm_sensor(PM01Value, PM2_5Value, PM10Value ))
+
+  if (read_pm_sensor(PM01Value, PM2_5Value, PM10Value))
   {
-    //    
+    //
   }
+
+  read_voc_sensor(AIRVOC);
+
 
   static unsigned long OledTimer = millis();
   if (millis() - OledTimer >= 1000)
@@ -60,32 +64,24 @@ void loop()
     Serial.println("  ug/m3");
     Serial.println();
 
-    if (client.connect(server, 80)) // "184.106.153.149" or api.thingspeak.com
+    Serial.print("VOC : ");
+    Serial.print(AIRVOC);
+    Serial.println(" x");
+    Serial.println();
+
+    if (WiFi.isConnected() != true)
     {
-      String postStr = apiKey;
-      postStr += "&field1=";
-      postStr += String(PM01Value);
-      postStr += "&field2=";
-      postStr += String(PM2_5Value);
-      postStr += "&field3=";
-      postStr += String(PM10Value);
-      postStr += "\r\n\r\n";
-
-      client.print("POST /update HTTP/1.1\n");
-      client.print("Host: api.thingspeak.com\n");
-      client.print("Connection: close\n");
-      client.print("X-THINGSPEAKAPIKEY: " + apiKey + "\n");
-      client.print("Content-Type: application/x-www-form-urlencoded\n");
-      client.print("Content-Length: ");
-      client.print(postStr.length());
-      client.print("\n\n");
-      client.print(postStr);
+      Serial.println("Wifi Not Connected");
     }
-    client.stop();
-
-
+    else
+    {
+      if (send_to_thingspeak_server(client, PM01Value, PM2_5Value, PM01Value))
+        Serial.println("data Sent to Server");
+        else
+        {
+          Serial.println("Data Not sent");
+        }
+        
+    }
   }
-  
 }
-
- 

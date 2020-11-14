@@ -1,3 +1,29 @@
+/*
+Air QUALITY SENSOR PM5005 and Grive Air Quality Sensor
+
+Connect to PMS5003
+ ____________________
+|                    |
+|                    |
+|          12345678  |
+|__________||||||||__|
+            
+8 -> 5V
+7 -> GND
+6 _> DNC
+5 -> 17 ( Serial1 TX)
+4 -> 16 ( Serial1 RX )
+
+
+Connect the Grove Sensor MP503
+
+VCC -> 3.3V on ESP32
+GND -> GND on ESP32
+SIG -> PIN 35 ( Analog In) on ESP32
+
+*/
+
+
 #include <Arduino.h>
 
 #define PM5005_DATA_LENG 31   //Used for reading Serial data for Air PPM Sensor
@@ -51,8 +77,8 @@ int transmitPM10(unsigned char *thebuf)
 
 bool read_pm_sensor(int& pm01, int& pm25, int& pm10)
 {
-  if (Serial.find(0x42)) {  //start to read when detect 0x42
-    Serial.readBytes(buf, PM5005_DATA_LENG);
+  if (Serial1.find(0x42)) {  //start to read when detect 0x42
+    Serial1.readBytes(buf, PM5005_DATA_LENG);
 
     if (buf[0] == 0x4d) {
       if (checkValue(buf, PM5005_DATA_LENG)) {
@@ -65,3 +91,33 @@ bool read_pm_sensor(int& pm01, int& pm25, int& pm10)
   } else return false;
 
 }
+
+bool read_voc_sensor(int& voc)
+{
+
+//Analog read is fast. so take 10 samples
+ int ivoc = 0;
+ for(int i=0; i<10; i++)
+ {
+    ivoc +=analogRead(35); 
+ }
+
+voc = map(ivoc/10, 0,1024,0,100);
+//Map the Analog value to PPM
+
+return true;
+}
+
+/*
+    if (_currentVoltage - _lastVoltage > 400 || _currentVoltage > 700) {
+        return AirQualitySensor::FORCE_SIGNAL;
+    } else if ((_currentVoltage - _lastVoltage > 400 && _currentVoltage < 700)
+               || _currentVoltage - _standardVoltage > 150) {
+        return AirQualitySensor::HIGH_POLLUTION;
+    } else if ((_currentVoltage - _lastVoltage > 200 && _currentVoltage < 700)
+               || _currentVoltage - _standardVoltage > 50) {
+        return AirQualitySensor::LOW_POLLUTION;
+    } else {
+        return AirQualitySensor::FRESH_AIR;
+    }
+*/
