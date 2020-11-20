@@ -26,6 +26,7 @@ SIG -> PIN 35 ( Analog In) on ESP32
 #include <Arduino.h>
 #include <movingAvg.h> // https://github.com/JChristensen/movingAvg
 #include <Adafruit_BME680.h>
+ 
 
 #define PM5005_DATA_LENG 31 //Used for reading Serial data for Air PPM Sensor
 unsigned char buf[PM5005_DATA_LENG];
@@ -57,20 +58,6 @@ void init_sensors()
     ma_PM1_0.begin();
     ma_PM2_5.begin();
     ma_PM10.begin();
-
-    if (bme.begin())
-    {
-        is_bme680_connected = true;
-        bme.setTemperatureOversampling(BME680_OS_8X);
-        bme.setHumidityOversampling(BME680_OS_2X);
-        bme.setPressureOversampling(BME680_OS_4X);
-        bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-        bme.setGasHeater(320, 150); // 320*C for 150 m
-    }
-    else
-    {
-        Serial.println("BME680 initialization Error");
-    }
 }
 
 // used by Air PPM monitor
@@ -129,7 +116,7 @@ bool read_pm_sensor(int &pm01, int &pm25, int &pm10)
             {
                 pm01 = ma_PM1_0.reading(transmitPM01(buf));  //count PM1.0 value of the air detector module
                 pm25 = ma_PM2_5.reading(transmitPM2_5(buf)); //count PM2.5 value of the air detector module
-                pm10 = ma_PM1_0.reading(transmitPM10(buf));  //count PM10 value of the air detector module
+                pm10 = ma_PM10.reading(transmitPM10(buf));  //count PM10 value of the air detector module
             }
         }
         return true;
@@ -145,25 +132,7 @@ bool read_voc_sensor(int &ivoc)
     return true;
 }
 
-bool read_bme680_sensor(float &temperature, float &pressure, float &humidity, float &gas_resistance, float &altitude)
-{
-    if (is_bme680_connected)
-    {
-        if (bme.performReading())
-        {
-            Serial.print(bme.temperature);
-            Serial.print(bme.pressure / 100.0);
-            Serial.print(bme.humidity);
-            Serial.print(bme.gas_resistance / 1000.0);
-            Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-            return true;
-        }
-        else
-            return false;
-    }
-    else
-        return false;
-}
+ 
 /*
     if (_currentVoltage - _lastVoltage > 400 || _currentVoltage > 700) {
         return AirQualitySensor::FORCE_SIGNAL;

@@ -14,7 +14,7 @@
 
 #include <fx.h>
 
-#define SW_VERSION "1.0"  //Change with every build
+#define SW_VERSION "0.0"  //Change with every build
 #define HW_VERSION HW_AQM //Change for hardware
 
 WiFiClient client;
@@ -23,7 +23,7 @@ PubSubClient mqttclient(client);
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial1.begin(9600);
   delay(10);
   Serial.println();
@@ -54,13 +54,9 @@ void loop()
 
   loopsPM++;
   read_pm_sensor(PM01Value, PM2_5Value, PM10Value);
-
   read_voc_sensor(voc_value);
- 
-  read_bme680_sensor(temperature_value, pressure_value, humidity_value, gas_resistance_value, altitude_value);
 
   checkHealthStatus();
-
 
   //Based on data frequency, send the data
   //data_frequency
@@ -75,6 +71,7 @@ void loop()
     send_mqtt_int(mqttclient, "data/pm2.5", PM2_5Value, false);
     send_mqtt_int(mqttclient, "data/pm10.", PM10Value, false);
     send_mqtt_int(mqttclient, "data/voc", voc_value, false);
+    
   }
 
   //Send diagnostics data
