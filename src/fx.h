@@ -38,16 +38,15 @@ void sendDiagnosticsData(PubSubClient &client)
   double uptime = esp_timer_get_time() / 3600000000; // Hours
   //double uptime = esp_timer_get_time() / (1000000*60*60) ;// Hours
 
-  send_mqtt_int(client, "system/loop-k", loopsPM / 1000, false );
-  send_mqtt_int(client, "system/reads", dataLoopsPM, false );
-  send_mqtt_int(client, "system/pkt-sent", packetsSentPM, false );
-  send_mqtt_int(client, "system/mem-kb", ESP.getFreeHeap()/1024, false );
-  send_mqtt_int(client, "system/fail", packetsFailPM, false );
-  send_mqtt_int(client, "system/wifi-err", wifiErrors, false );
-  send_mqtt_int(client, "system/mqtt-err", mqttErrors , false);
-  send_mqtt_int(client, "system/ble-err", bleErrors, false );
-  send_mqtt_float(client, "system/uptime-hrs", uptime, false );
-
+  send_mqtt_int("system/loop-k", loopsPM / 1000, false );
+  send_mqtt_int("system/reads", dataLoopsPM, false );
+  send_mqtt_int( "system/pkt-sent", packetsSentPM, false );
+  send_mqtt_int( "system/mem-kb", ESP.getFreeHeap()/1024, false );
+  send_mqtt_int("system/fail", packetsFailPM, false );
+  send_mqtt_int( "system/wifi-err", wifiErrors, false );
+  send_mqtt_int( "system/mqtt-err", mqttErrors , false);
+  send_mqtt_int( "system/ble-err", bleErrors, false );
+  send_mqtt_float("system/uptime-hrs", uptime, false );
   loopsPM = 0;
   dataLoopsPM = 0;
   lastpacketsSentPM = packetsSentPM;
@@ -79,14 +78,14 @@ void checkHealthStatus()
 }
 
 //Send device Configurations
-void sendConfig(PubSubClient &client, String hw_version) {
+void sendConfig( String hw_version) {
   // Update this to a Json structure
 
-  send_mqtt_int(client, "config/dataFrequency", data_frequency, false );
-  send_mqtt_int(client, "config/unitCelsius", default_unit_C, false );
-  send_mqtt_string(client, "config/rootTopic", mqtt_topic_prefix, false );
-  send_mqtt_string(client, "config/subsTopic", mqtt_subs_topic, false );
-  send_mqtt_int(client, "config/timeZone", timeZone, false );
+  send_mqtt_int("config/dataFrequency", data_frequency, false );
+  send_mqtt_int("config/unitCelsius", default_unit_C, false );
+  send_mqtt_string( "config/rootTopic", mqtt_topic_prefix, false );
+  send_mqtt_string( "config/subsTopic", mqtt_subs_topic, false );
+  send_mqtt_int( "config/timeZone", timeZone, false );
 
   if (hw_version ==  HW_AQM)
   {
@@ -94,13 +93,13 @@ void sendConfig(PubSubClient &client, String hw_version) {
   } else if (hw_version ==  HW_OCC) //If Occupancy Counter
   {
 
-  send_mqtt_int(client, "config/scanZone", scan_zone, false );
-  send_mqtt_int(client, "config/scanTime", blue_scan_time, false );
-  send_mqtt_int(client, "config/maxDistance", blue_distance_max, false );
-  send_mqtt_int(client, "config/minDistance", blue_distance_min, false );
-  send_mqtt_int(client, "config/scanInterval", blue_interval, false );
-  send_mqtt_int(client, "config/scanWindow", blue_window, false);
-  send_mqtt_int(client, "config/calibrationRssi", calibrationRssi, false );
+  send_mqtt_int( "config/scanZone", scan_zone, false );
+  send_mqtt_int( "config/scanTime", blue_scan_time, false );
+  send_mqtt_int(  "config/maxDistance", blue_distance_max, false );
+  send_mqtt_int( "config/minDistance", blue_distance_min, false );
+  send_mqtt_int(  "config/scanInterval", blue_interval, false );
+  send_mqtt_int( "config/scanWindow", blue_window, false);
+  send_mqtt_int( "config/calibrationRssi", calibrationRssi, false );
 
   }
   

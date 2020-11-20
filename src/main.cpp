@@ -17,13 +17,10 @@
 #define SW_VERSION "0.0"  //Change with every build
 #define HW_VERSION HW_AQM //Change for hardware
 
-WiFiClient client;
-
-PubSubClient mqttclient(client);
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial1.begin(9600);
   delay(10);
   Serial.println();
@@ -43,8 +40,8 @@ void setup()
   // Printing the ESP IP address
   Serial.println(WiFi.localIP());
 
-  init_mqtt(mqttclient, SW_VERSION, HW_VERSION);
-  sendConfig(mqttclient, HW_VERSION);
+  init_mqtt(SW_VERSION, HW_VERSION);
+  sendConfig(HW_VERSION);
 
   init_sensors();
 }
@@ -67,10 +64,10 @@ void loop()
     dataLoopsPM++;
     previousDataMillis = currentMillis;
 
-    send_mqtt_int(mqttclient, "data/pm1.0", PM01Value, false);
-    send_mqtt_int(mqttclient, "data/pm2.5", PM2_5Value, false);
-    send_mqtt_int(mqttclient, "data/pm10.", PM10Value, false);
-    send_mqtt_int(mqttclient, "data/voc", voc_value, false);
+    send_mqtt_int("data/pm1.0", PM01Value, false);
+    send_mqtt_int("data/pm2.5", PM2_5Value, false);
+    send_mqtt_int("data/pm10.", PM10Value, false);
+    send_mqtt_int( "data/voc", voc_value, false);
     
   }
 

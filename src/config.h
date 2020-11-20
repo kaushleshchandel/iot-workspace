@@ -38,6 +38,5 @@
 
 
 //hardware Versions
-
 #define HW_AQM "ESP32-AQM"
 #define HW_OCC "M5STICK-C"
