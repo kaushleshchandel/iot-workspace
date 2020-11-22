@@ -54,7 +54,7 @@ void BLE_counter::get_count(int &deviceTotal, int &peopleTotal )
     Serial.print(distance);    
   //  Serial.print(":");
 
-    if( distance < _maxDistance && distance >> _minDistance  )
+    if( distance <= _maxDistance && distance >= _minDistance  )
     {
         peopleTotal ++;
         Serial.print(":Y | ");
