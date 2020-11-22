@@ -17,8 +17,8 @@ const char* ssid = DEFAULT_SSID;
 const char* password = DEFAULT_WIFI_PWD;
 
 int data_frequency = DEFAULT_SCANNING_FREQUENCY;
-int blue_distance_max = DEFAULT_BLUE_RSSI_LIMIT_HIGH;
-int blue_distance_min = DEFAULT_BLUE_RSSI_LIMIT_LOW;
+int blue_distance_max = DEFAULT_MAX_DISTANCE;
+int blue_distance_min = DEFAULT_MIN_DISTANCE;
 int blue_scan_time = DEFAULT_BLUE_SCANTIME;
 int blue_interval = DEFAULT_BLUE_INTERVAL;
 int blue_window = DEFAULT_BLUE_WINDOW;

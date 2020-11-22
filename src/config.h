@@ -9,8 +9,8 @@
 #define DEFAULT_WIFI_PWD "608980608980"
 
 
-#define DEFAULT_BLUE_RSSI_LIMIT_LOW 0 // 
-#define DEFAULT_BLUE_RSSI_LIMIT_HIGH 50 // Default highest RSSI to send data for
+#define DEFAULT_MIN_DISTANCE 0 // 
+#define DEFAULT_MAX_DISTANCE 10 // Default highest RSSI to send data for
 #define DEFAULT_SCANNING_FREQUENCY  10// 30 // Data sending frequency in seconds
 #define DEFAULT_BLUE_SCANTIME  5 // BLE Scantime
 #define DEFAULT_BLUE_INTERVAL  100 // BLE Scantime

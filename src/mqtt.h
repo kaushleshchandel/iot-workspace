@@ -138,9 +138,8 @@ void callback(char *topic, byte *message, unsigned int length)
     {
         Serial.print("Setting defaults");
         data_frequency = DEFAULT_SCANNING_FREQUENCY;
-        blue_distance_max = DEFAULT_BLUE_RSSI_LIMIT_HIGH;
-
-        blue_distance_min = DEFAULT_BLUE_RSSI_LIMIT_LOW;
+        blue_distance_max = DEFAULT_MAX_DISTANCE;
+        blue_distance_min = DEFAULT_MIN_DISTANCE;
         blue_scan_time = DEFAULT_BLUE_SCANTIME;
         blue_interval = DEFAULT_BLUE_INTERVAL;
         blue_window = DEFAULT_BLUE_WINDOW;

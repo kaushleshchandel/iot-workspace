@@ -13,17 +13,22 @@
 #include <variables.h>
 #include <ota.h>
 #include <mqtt.h>
-#include <m5hats.h>
 #include <fx.h>
+#include <ble_counter.h>
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
 #define HW_VERSION HW_OCC
 #include <M5StickC.h>
 #include <display.h>
+#include <m5hats.h>
+
+BLE_counter BLE_counter;
+
 #elif defined(DEVICE_HW_AQM) //Air Quality
 #define HW_VERSION HW_AQM
 #include <air_qaulity_sensors.h>
 #endif
+
 
 void setup()
 {
@@ -37,7 +42,9 @@ void setup()
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(0, 40);
-startupScreen();
+  startupScreen(SW_VERSION);
+  //initBLE(blue_interval, blue_window);
+  BLE_counter.init(blue_interval, blue_window, blue_distance_max, blue_distance_min, blue_scan_time, blue_window);
 #elif defined(DEVICE_HW_AQM) //Air Quality
   Serial1.begin(9600)
       Serial.println("Device Mode: Occupancy Trakcer");
@@ -94,7 +101,11 @@ void loop()
     previousDataMillis = currentMillis;
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
-
+  int d = 0;
+  int t = 0;
+  BLE_counter.get_count(t,d);
+    send_mqtt_int("data/occp", d, false);
+        send_mqtt_int("data/totl", t, false);
 #elif defined(DEVICE_HW_AQM) //Air Quality
     send_mqtt_int("data/pm1.0", PM01Value, false);
     send_mqtt_int("data/pm2.5", PM2_5Value, false);
@@ -102,7 +113,6 @@ void loop()
     send_mqtt_int("data/voc", voc_value, false);
 #endif
   }
-
 
   checkHealthStatus();
 
