@@ -1,6 +1,6 @@
 
-#define DEVICE_HW_OCC    //Use this for Code selection
-#define SW_VERSION "0.0" //Change with every build
+#define DEVICE_HW_OCC        //Use this for Code selection
+#define SW_VERSION "0.0-DEV" //Change with every build
 
 #include <PubSubClient.h>
 #include <WiFi.h>
@@ -14,21 +14,19 @@
 #include <ota.h>
 #include <mqtt.h>
 #include <fx.h>
-#include <ble_counter.h>
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
 #define HW_VERSION HW_OCC
+#include <ble_counter.h>
 #include <M5StickC.h>
 #include <display.h>
 #include <m5hats.h>
-
 BLE_counter BLE_counter;
 
 #elif defined(DEVICE_HW_AQM) //Air Quality
 #define HW_VERSION HW_AQM
 #include <air_qaulity_sensors.h>
 #endif
-
 
 void setup()
 {
@@ -38,13 +36,13 @@ void setup()
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
   Serial.println("Device Mode: Occupancy");
   M5.begin();
-
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(0, 40);
   startupScreen(SW_VERSION);
-  //initBLE(blue_interval, blue_window);
-  BLE_counter.init(blue_interval, blue_window, blue_distance_max, blue_distance_min, blue_scan_time, blue_window);
+  spaceCapacity = get_space_capacity();
+ 
+  BLE_counter.init(true, blue_interval, blue_window, blue_distance_max, blue_distance_min, blue_scan_time, blue_window);
 #elif defined(DEVICE_HW_AQM) //Air Quality
   Serial1.begin(9600)
       Serial.println("Device Mode: Occupancy Trakcer");
@@ -68,6 +66,7 @@ void setup()
   init_mqtt(SW_VERSION, HW_VERSION);
 
   //Add Code here to check for hats
+
 
   sendConfig(HW_VERSION);
 
@@ -101,11 +100,22 @@ void loop()
     previousDataMillis = currentMillis;
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
-  int d = 0;
-  int t = 0;
-  BLE_counter.get_count(t,d);
+    int d = 0;
+    int t = 0;
+    BLE_counter.get_count(t, d);
     send_mqtt_int("data/occp", d, false);
-        send_mqtt_int("data/totl", t, false);
+    send_mqtt_int("data/totl", t, false);
+
+    int ocolor = 0;
+    if (t >= spaceRed)
+      ocolor = 3;
+    else if (t >= spaceYellow)
+      ocolor = 2;
+    else if (t >= spaceGreen)
+      ocolor = 1;
+    else
+      ocolor = 0;
+    display_occupancy(t, ocolor);
 #elif defined(DEVICE_HW_AQM) //Air Quality
     send_mqtt_int("data/pm1.0", PM01Value, false);
     send_mqtt_int("data/pm2.5", PM2_5Value, false);

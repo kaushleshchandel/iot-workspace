@@ -6,27 +6,29 @@
 #include <BLEAdvertisedDevice.h>
 #include <Arduino.h>
 
+#define DEFAULT_ARRAYSIZE 100
 
 class BLE_counter
 {
-  public:
-    BLE_counter();
-    void get_count(int &deviceTotal, int &peopleTotal );
-    void init(int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow);    
-  private:
-    int _maxDistance;
-    int _minDistance;
-    int _interval;
-    int _window;
-    int _scantime;
-    int _calibrationRssi = -75;
-    const int _ARRAYSIZE = 100;
-    double _occupant_rssi[101];
+public:
+  BLE_counter();
+  void get_count(int &deviceTotal, int &peopleTotal);
+  void init(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow);
+  void set_parameters(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow);
 
-    BLEScan* pBLEScan;
-    int rssi_to_feet(int rssi);
+private:
+  int _activeScan;
+  int _maxDistance;
+  int _minDistance;
+  int _interval;
+  int _window;
+  int _scantime;
+  int _calibrationRssi = -75;
+  const int _arrayasize = DEFAULT_ARRAYSIZE;
+  double _occupant_rssi[DEFAULT_ARRAYSIZE + 1];
 
+  BLEScan *pBLEScan;
+  int rssi_to_feet(int rssi);
 };
-
 
 #endif

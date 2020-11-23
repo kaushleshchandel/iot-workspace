@@ -133,7 +133,37 @@ void callback(char *topic, byte *message, unsigned int length)
         Serial.print("Change Scan Interval");
         blue_interval = messageTemp.toInt();
     }
-
+    else if (String(topic) == topicroot + "activeScan")
+    {
+        Serial.print("Change ActiveScan");
+        blue_active_scan = messageTemp.toInt();
+    }
+    else if (String(topic) == topicroot + "spaceCapacity")
+    {
+        Serial.print("Change spaceCapacity");
+        spaceCapacity = messageTemp.toInt();
+        set_space_capacity(spaceCapacity);
+    }
+    else if (String(topic) == topicroot + "spaceThreshold")
+    {
+        Serial.print("Change spaceThreshold");
+        spaceThreshold = messageTemp.toInt();
+    }
+    else if (String(topic) == topicroot + "spaceYellow")
+    {
+        Serial.print("Change spaceYellow");
+        spaceYellow = messageTemp.toInt();
+    }
+    else if (String(topic) == topicroot + "spaceRed")
+    {
+        Serial.print("Change spaceRed");
+        spaceRed = messageTemp.toInt();
+    }
+    else if (String(topic) == topicroot + "spaceGreen")
+    {
+        Serial.print("Change spaceGreen");
+        spaceGreen = messageTemp.toInt();
+    }
     else if (String(topic) == topicroot + "setDefaults")
     {
         Serial.print("Setting defaults");
@@ -145,6 +175,11 @@ void callback(char *topic, byte *message, unsigned int length)
         blue_window = DEFAULT_BLUE_WINDOW;
         timeZone = DEFAULT_TIME_ZONE;
         default_unit_C = DEFAULT_UNIT_C;
+        spaceCapacity = DEFAULT_SPACE_CAPACITY;
+        spaceThreshold = DEFAULT_SPACE_THRESHOLD;
+        spaceYellow = DEFAULT_COUNT_TO_YELLOW;
+        spaceGreen = DEFAULT_COUNT_TO_GREEN;
+        spaceRed = DEFAULT_COUNT_TO_RED;
     }
     else
     {
@@ -154,8 +189,8 @@ void callback(char *topic, byte *message, unsigned int length)
         send_mqtt_string("set/cmd", "OK", false);
     else
         send_mqtt_string("set/cmd", "INVALID", false);
-    
-   // sendConfig();
+
+    // sendConfig();
 }
 //
 
@@ -219,15 +254,15 @@ bool send_mqtt_float(String topic, double value, bool retain)
     return res;
 }
 
-void init_mqtt( String sw_version, String hw_version)
+void init_mqtt(String sw_version, String hw_version)
 {
 
     mqttclient.setServer(mqtt_server, 1883);
     mqttclient.setCallback(callback);
 
     String sbeacon_id = get_beacon_id();
-    String swilltopic = sbeacon_id + "/status" ;
-    String substopic = sbeacon_id + "/" + DEFAULT_SUB_TOPIC +  "set/#";
+    String swilltopic = sbeacon_id + "/status";
+    String substopic = sbeacon_id + "/" + DEFAULT_SUB_TOPIC + "/#";
 
     char tempStringSubsTopic[50];
     char tempStringWillTopic[50];
@@ -244,9 +279,9 @@ void init_mqtt( String sw_version, String hw_version)
 
         // Subscribe to the commands
         mqttclient.subscribe(tempStringSubsTopic);
-        send_mqtt_string( "system/sw", sw_version, false);
-        send_mqtt_string( "system/hw", hw_version, false);
-        send_mqtt_string( "status", "online", true);
+        send_mqtt_string("system/sw", sw_version, false);
+        send_mqtt_string("system/hw", hw_version, false);
+        send_mqtt_string("status", "online", true);
     }
     else
     {
@@ -319,7 +354,7 @@ void reconnect()
 
             // Subscribe to the commands
             mqttclient.subscribe(tempStringSubsTopic);
-            send_mqtt_string( "status", "online", true);
+            send_mqtt_string("status", "online", true);
         }
         else
         {

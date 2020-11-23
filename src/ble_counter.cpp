@@ -5,44 +5,54 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 
-
-
 BLE_counter::BLE_counter()
 {
-    
 }
 
-void BLE_counter::init(int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow)
+void BLE_counter::init(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow)
 {
- // pinMode(pin, 1);
- 
- _interval = interval;
- _maxDistance = maxDistance;
- _minDistance = minDistance;
- _scantime = scanTime;
- _window = scanWwindow;
+  // pinMode(pin, 1);
+
+  _interval = interval;
+  _maxDistance = maxDistance;
+  _minDistance = minDistance;
+  _scantime = scanTime;
+  _window = scanWwindow;
+  _activeScan = activeScan;
 
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
-  //pBLEScan->setAdvertisedDeviceCallbacks(new MyAdvertisedDeviceCallbacks());
-  pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
+  pBLEScan->setActiveScan(_activeScan); //active scan uses more power, but get results faster
   pBLEScan->setInterval(_interval);
-  pBLEScan->setWindow(_window);  // less or equal setInterval value
-
+  pBLEScan->setWindow(_window); // less or equal setInterval value
 }
-void BLE_counter::get_count(int &deviceTotal, int &peopleTotal )
+
+void BLE_counter::set_parameters(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow)
 {
-   
-    peopleTotal = 0;
+  _interval = interval;
+  _maxDistance = maxDistance;
+  _minDistance = minDistance;
+  _scantime = scanTime;
+  _window = scanWwindow;
+  _activeScan = activeScan;
+
+  pBLEScan->setActiveScan(_activeScan); //active scan uses more power, but get results faster
+  pBLEScan->setInterval(_interval);
+  pBLEScan->setWindow(_window); // less or equal setInterval value
+}
+
+void BLE_counter::get_count(int &deviceTotal, int &peopleTotal)
+{
+
   Serial.print("SCAN: ");
 
   BLEDevice::init("");
   pBLEScan->setInterval(_interval);
-   
+
   BLEScanResults foundDevices = pBLEScan->start(_scantime, false);
 
-  BLEScan* pBLEScan = BLEDevice::getScan(); //create new scan
-  pBLEScan->setActiveScan(true); //active scan uses more power, but get results faster
+  BLEScan *pBLEScan = BLEDevice::getScan(); //create new scan
+  pBLEScan->setActiveScan(true);            //active scan uses more power, but get results faster
 
   deviceTotal = foundDevices.getCount();
 
@@ -51,28 +61,26 @@ void BLE_counter::get_count(int &deviceTotal, int &peopleTotal )
 
     BLEAdvertisedDevice device = foundDevices.getDevice(i);
     int distance = rssi_to_feet(device.getRSSI());
-    Serial.print(distance);    
-  //  Serial.print(":");
+    Serial.print(distance);
+    //  Serial.print(":");
 
-    if( distance <= _maxDistance && distance >= _minDistance  )
+    if (distance <= _maxDistance && distance >= _minDistance)
     {
-        peopleTotal ++;
-        Serial.print(":Y | ");
-    } else
-    {
-          Serial.print(":N | ");
+      peopleTotal++;
+      Serial.print(":Y | ");
     }
-    
-        
+    else
+    {
+      Serial.print(":N | ");
+    }
   }
-Serial.println(" ");
-  pBLEScan->clearResults();   // delete results fromBLEScan buffer to release memory
-  
+  Serial.println(" ");
+  pBLEScan->clearResults(); // delete results fromBLEScan buffer to release memory
 }
 
 int BLE_counter::rssi_to_feet(int rssi)
 {
-double dist;
-  dist = pow(10.0, (double)(_calibrationRssi - rssi) / 20.0); 
-  return dist*3.28084;
+  double dist;
+  dist = pow(10.0, (double)(_calibrationRssi - rssi) / 20.0);
+  return dist * 3.28084;
 }
