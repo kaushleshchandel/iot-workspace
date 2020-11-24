@@ -72,28 +72,3 @@ void checkHealthStatus()
         esp_restart();
     }
 }
-
-//Send device Configurations
-void sendConfig(String hw_version)
-{
-    // Update this to a Json structure
-
-    send_mqtt_int("config/dataFrequency", data_frequency, false);
-    send_mqtt_int("config/unitCelsius", default_unit_C, false);
-    send_mqtt_string("config/rootTopic", mqtt_topic_prefix, false);
-    send_mqtt_string("config/subsTopic", mqtt_subs_topic, false);
-    send_mqtt_int("config/timeZone", timeZone, false);
-
-    send_mqtt_int("config/scanTime", blue_scan_time, false);
-    send_mqtt_int("config/scanInterval", blue_interval, false);
-    send_mqtt_int("config/scanWindow", blue_window, false);
-    send_mqtt_int("config/calibrationRssi", calibrationRssi, false);
-    send_mqtt_int("config/activeScan", blue_active_scan, false);
-    send_mqtt_int("config/maxDistance", blue_distance_max, false);
-    send_mqtt_int("config/minDistance", blue_distance_min, false);
-    send_mqtt_int("config/spaceCapacity", spaceCapacity, false);
-    send_mqtt_int("config/spaceThreshold", spaceThreshold, false);
-    send_mqtt_int("config/spaceYellow", spaceYellow, false);
-    send_mqtt_int("config/spaceGreen", spaceGreen, false);
-    send_mqtt_int("config/spaceRed", spaceRed, false);
-}

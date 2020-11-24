@@ -57,6 +57,93 @@ bool send_mqtt_string(String topic, String value, bool retain)
     return res;
 }
 
+
+bool send_mqtt_int(String topic, long value, bool retain)
+{
+
+    bool res = false;
+
+    if (mqttclient.connected())
+    {
+        topic = getFullTopic(topic);
+        char tempStringTopic[50];
+        char tempStringvalue[20];
+
+        topic.toCharArray(tempStringTopic, topic.length() + 1);
+        dtostrf(value, 1, 0, tempStringvalue);
+        res = mqttclient.publish(tempStringTopic, tempStringvalue);
+
+        if (res != true)
+        {
+            Serial.print(" MQTT Send Failure");
+            packetsFailPM++;
+        }
+        else
+        {
+            packetsSentPM++;
+        }
+    }
+    else
+        Serial.print(" MQTT Not connected");
+
+    return res;
+}
+
+bool send_mqtt_float(String topic, double value, bool retain)
+{
+    bool res = false;
+    if (mqttclient.connected())
+    {
+        topic = getFullTopic(topic);
+        char tempStringTopic[50];
+        char tempStringvalue[20];
+        topic.toCharArray(tempStringTopic, topic.length() + 1);
+        dtostrf(value, 1, 2, tempStringvalue);
+        res = mqttclient.publish(tempStringTopic, tempStringvalue, retain);
+
+        if (res != true)
+        {
+            Serial.print(" MQTT Send Failure");
+            packetsFailPM++;
+        }
+        else
+        {
+            packetsSentPM++;
+        }
+    }
+    else
+
+        Serial.print(" MQTT Not connected");
+
+    return res;
+}
+
+
+//Send device Configurations
+void sendConfig()
+{
+    // Update this to a Json structure
+
+    send_mqtt_int("config/dataFrequency", data_frequency, false);
+    send_mqtt_int("config/unitCelsius", default_unit_C, false);
+    send_mqtt_string("config/rootTopic", mqtt_topic_prefix, false);
+    send_mqtt_string("config/subsTopic", mqtt_subs_topic, false);
+    send_mqtt_int("config/timeZone", timeZone, false);
+    send_mqtt_int("config/scanTime", blue_scan_time, false);
+    send_mqtt_int("config/scanInterval", blue_interval, false);
+    send_mqtt_int("config/scanWindow", blue_window, false);
+    send_mqtt_int("config/calibrationRssi", calibrationRssi, false);
+    send_mqtt_int("config/activeScan", blue_active_scan, false);
+    send_mqtt_int("config/maxDistance", blue_distance_max, false);
+    send_mqtt_int("config/minDistance", blue_distance_min, false);
+    send_mqtt_int("config/spaceCapacity", spaceCapacity, false);
+    send_mqtt_int("config/spaceThreshold", spaceThreshold, false);
+    send_mqtt_int("config/spaceYellow", spaceYellow, false);
+    send_mqtt_int("config/spaceGreen", spaceGreen, false);
+    send_mqtt_int("config/spaceRed", spaceRed, false);
+}
+
+
 void callback(char *topic, byte *message, unsigned int length)
 {
     Serial.print("Message arrived on topic: ");
@@ -142,7 +229,7 @@ void callback(char *topic, byte *message, unsigned int length)
     {
         Serial.print("Change spaceCapacity");
         spaceCapacity = messageTemp.toInt();
-        set_space_capacity(spaceCapacity);
+         
     }
     else if (String(topic) == topicroot + "spaceThreshold")
     {
@@ -164,124 +251,67 @@ void callback(char *topic, byte *message, unsigned int length)
         Serial.print("Change spaceGreen");
         spaceGreen = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "setDefaults")
+    else if (String(topic) == topicroot + "setDefaults" || String(topic) == topicroot + "factoryreset")
     {
         Serial.print("Setting defaults");
-        data_frequency = DEFAULT_SCANNING_FREQUENCY;
-        blue_distance_max = DEFAULT_MAX_DISTANCE;
-        blue_distance_min = DEFAULT_MIN_DISTANCE;
-        blue_scan_time = DEFAULT_BLUE_SCANTIME;
-        blue_interval = DEFAULT_BLUE_INTERVAL;
-        blue_window = DEFAULT_BLUE_WINDOW;
-        timeZone = DEFAULT_TIME_ZONE;
-        default_unit_C = DEFAULT_UNIT_C;
-        spaceCapacity = DEFAULT_SPACE_CAPACITY;
-        spaceThreshold = DEFAULT_SPACE_THRESHOLD;
-        spaceYellow = DEFAULT_COUNT_TO_YELLOW;
-        spaceGreen = DEFAULT_COUNT_TO_GREEN;
-        spaceRed = DEFAULT_COUNT_TO_RED;
+        set_default_config();
     }
     else
     {
         iscommandvalid = false;
     }
-    if (iscommandvalid)
-        send_mqtt_string("set/cmd", "OK", false);
-    else
-        send_mqtt_string("set/cmd", "INVALID", false);
 
-    // sendConfig();
+
+    if (iscommandvalid)
+    {
+        save_config();
+        read_config();
+        send_mqtt_string("set/cmd", "OK", false);
+        sendConfig();
+    }
+
 }
 //
 
-bool send_mqtt_int(String topic, long value, bool retain)
+void subscribe_to_topic(String topic)
 {
-
-    bool res = false;
-
-    if (mqttclient.connected())
-    {
-        topic = getFullTopic(topic);
-        char tempStringTopic[50];
-        char tempStringvalue[20];
-
-        topic.toCharArray(tempStringTopic, topic.length() + 1);
-        dtostrf(value, 1, 0, tempStringvalue);
-        res = mqttclient.publish(tempStringTopic, tempStringvalue);
-
-        if (res != true)
-        {
-            Serial.print(" MQTT Send Failure");
-            packetsFailPM++;
-        }
-        else
-        {
-            packetsSentPM++;
-        }
-    }
-    else
-        Serial.print(" MQTT Not connected");
-
-    return res;
-}
-
-bool send_mqtt_float(String topic, double value, bool retain)
-{
-    bool res = false;
-    if (mqttclient.connected())
-    {
-        topic = getFullTopic(topic);
-        char tempStringTopic[50];
-        char tempStringvalue[20];
-        topic.toCharArray(tempStringTopic, topic.length() + 1);
-        dtostrf(value, 1, 2, tempStringvalue);
-        res = mqttclient.publish(tempStringTopic, tempStringvalue, retain);
-
-        if (res != true)
-        {
-            Serial.print(" MQTT Send Failure");
-            packetsFailPM++;
-        }
-        else
-        {
-            packetsSentPM++;
-        }
-    }
-    else
-
-        Serial.print(" MQTT Not connected");
-
-    return res;
+    String substopic = get_beacon_id() + "/" + topic + "/#";
+    char tempStringSubsTopic[50];
+    substopic.toCharArray(tempStringSubsTopic, substopic.length() + 1);
+    send_mqtt_string("system/sub-topic", tempStringSubsTopic, false);
+    mqttclient.subscribe(tempStringSubsTopic);
 }
 
 void init_mqtt(String sw_version, String hw_version)
 {
 
-    mqttclient.setServer(mqtt_server, 1883);
+    mqttclient.setServer(mqtt_server, default_mqtt_port);
     mqttclient.setCallback(callback);
 
     String sbeacon_id = get_beacon_id();
     String swilltopic = sbeacon_id + "/status";
-    String substopic = sbeacon_id + "/" + DEFAULT_SUB_TOPIC + "/#";
 
-    char tempStringSubsTopic[50];
     char tempStringWillTopic[50];
     char tempStringclientID[50];
 
     sbeacon_id.toCharArray(will_topic, sbeacon_id.length() + 1);
     sbeacon_id.toCharArray(tempStringclientID, sbeacon_id.length() + 1);
     swilltopic.toCharArray(tempStringWillTopic, swilltopic.length() + 1);
-    substopic.toCharArray(tempStringSubsTopic, substopic.length() + 1);
 
     if (mqttclient.connect(tempStringclientID, mqtt_user, mqtt_pass, tempStringWillTopic, 0, true, "offline"))
     {
         Serial.println("MQTT connected");
 
         // Subscribe to the commands
-        mqttclient.subscribe(tempStringSubsTopic);
-        send_mqtt_string("system/sw", sw_version, false);
-        send_mqtt_string("system/hw", hw_version, false);
+        subscribe_to_topic(DEFAULT_SUB_TOPIC);
+
+        send_mqtt_string("system/will-topic", swilltopic, false);
+        send_mqtt_string("system/software", sw_version, false);
+        send_mqtt_string("system/hardware", hw_version, false);
         send_mqtt_string("status", "online", true);
+
+        sendConfig();
+        
     }
     else
     {
@@ -330,7 +360,6 @@ void reconnect()
 
     String sbeacon_id = get_beacon_id();
     String swilltopic = sbeacon_id;
-    String substopic = sbeacon_id + "/set/#";
 
     char tempStringSubsTopic[50];
     char tempStringWillTopic[50];
@@ -341,9 +370,6 @@ void reconnect()
 
     swilltopic.toCharArray(tempStringWillTopic, swilltopic.length() + 1);
 
-    //sbeacon_id += "/set/#"; //The Subscribe command topic
-    substopic.toCharArray(tempStringSubsTopic, substopic.length() + 1);
-
     String becon_id = get_beacon_id();
 
     for (int i = 0; i < 5; i++)
@@ -351,9 +377,8 @@ void reconnect()
         Serial.print("Attempting MQTT connection...");
         if (mqttclient.connect("SecureClient"))
         {
-
             // Subscribe to the commands
-            mqttclient.subscribe(tempStringSubsTopic);
+            subscribe_to_topic(DEFAULT_SUB_TOPIC);
             send_mqtt_string("status", "online", true);
         }
         else

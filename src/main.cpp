@@ -31,7 +31,15 @@ BLE_counter BLE_counter;
 void setup()
 {
   Serial.begin(115200);
-  delay(10);
+  delay(100);
+ 
+
+  if (read_config() == false)
+  {
+    Serial.println("Blank Config. Setting defaults");
+    set_default_config(); 
+    save_config();
+  } 
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
   Serial.println("Device Mode: Occupancy");
@@ -40,7 +48,7 @@ void setup()
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(0, 40);
   startupScreen(SW_VERSION);
-  spaceCapacity = get_space_capacity();
+  //spaceCapacity = get_space_capacity();
  
   BLE_counter.init(true, blue_interval, blue_window, blue_distance_max, blue_distance_min, blue_scan_time, blue_window);
 #elif defined(DEVICE_HW_AQM) //Air Quality
@@ -66,9 +74,6 @@ void setup()
   init_mqtt(SW_VERSION, HW_VERSION);
 
   //Add Code here to check for hats
-
-
-  sendConfig(HW_VERSION);
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
   //Add Code for Initializing the Occupanc Sensors & the HATS
@@ -131,4 +136,6 @@ void loop()
     previousDiagnosticsMillis = currentMillis;
     sendDiagnosticsData(mqttclient);
   }
+
+  mqttclient.loop();
 }
