@@ -8,27 +8,8 @@
 //Tries to reconnect to wifi
 void reconnect_WiFi()
 {
-    WiFi.disconnect();
-    Serial.println("Reconnecting to WiFi...");
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.begin(ssid, password);
-
-    //Try to reconnect for 5 minutes
-    for (int i = 0; i < 60 * 5; i++)
-    {
-        if (WiFi.status() != WL_CONNECTED)
-        {
-            delay(1000);
-            Serial.print(".");
-        }
-    }
-    if (WiFi.status() == WL_CONNECTED)
-    {
-        Serial.println("");
-        Serial.println("WiFi Connected");
-        Serial.println("IP address: ");
-        Serial.println(WiFi.localIP());
-    }
+ 
+ 
 }
 
 void sendDiagnosticsData(PubSubClient &client)

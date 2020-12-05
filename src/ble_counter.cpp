@@ -9,7 +9,7 @@ BLE_counter::BLE_counter()
 {
 }
 
-void BLE_counter::init(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow)
+void BLE_counter::init(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow, int calrssi)
 {
   // pinMode(pin, 1);
 
@@ -19,6 +19,7 @@ void BLE_counter::init(bool activeScan, int interval, int window, int maxDistanc
   _scantime = scanTime;
   _window = scanWwindow;
   _activeScan = activeScan;
+  _calibrationRssi =  calrssi;
 
   BLEDevice::init("");
   pBLEScan = BLEDevice::getScan(); //create new scan
@@ -27,7 +28,7 @@ void BLE_counter::init(bool activeScan, int interval, int window, int maxDistanc
   pBLEScan->setWindow(_window); // less or equal setInterval value
 }
 
-void BLE_counter::set_parameters(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow)
+void BLE_counter::set_parameters(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow, int calrssi)
 {
   _interval = interval;
   _maxDistance = maxDistance;
@@ -35,7 +36,8 @@ void BLE_counter::set_parameters(bool activeScan, int interval, int window, int 
   _scantime = scanTime;
   _window = scanWwindow;
   _activeScan = activeScan;
-
+  _calibrationRssi =  calrssi;
+  
   pBLEScan->setActiveScan(_activeScan); //active scan uses more power, but get results faster
   pBLEScan->setInterval(_interval);
   pBLEScan->setWindow(_window); // less or equal setInterval value

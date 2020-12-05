@@ -13,8 +13,8 @@ class BLE_counter
 public:
   BLE_counter();
   void get_count(int &deviceTotal, int &peopleTotal);
-  void init(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow);
-  void set_parameters(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow);
+  void init(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow, int calrssi);
+  void set_parameters(bool activeScan, int interval, int window, int maxDistance, int minDistance, int scanTime, int scanWwindow, int calrssi);
 
 private:
   int _activeScan;

@@ -1,6 +1,6 @@
 
-#define DEVICE_HW_OCC        //Use this for Code selection
-#define SW_VERSION "0.0-DEV" //Change with every build
+#define DEVICE_HW_OCC    //Use this for Code selection
+#define SW_VERSION "1.7" //Change with every build
 
 #include <PubSubClient.h>
 #include <WiFi.h>
@@ -21,6 +21,8 @@
 #include <M5StickC.h>
 #include <display.h>
 #include <m5hats.h>
+#include <captiv.h>
+
 BLE_counter BLE_counter;
 
 #elif defined(DEVICE_HW_AQM) //Air Quality
@@ -28,36 +30,40 @@ BLE_counter BLE_counter;
 #include <air_qaulity_sensors.h>
 #endif
 
+bool newRun = true;
+
 void setup()
 {
   Serial.begin(115200);
   delay(100);
- 
 
   if (read_config() == false)
   {
     Serial.println("Blank Config. Setting defaults");
-    set_default_config(); 
+    set_default_config();
     save_config();
-  } 
+  }
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
   Serial.println("Device Mode: Occupancy");
   M5.begin();
-  M5.Lcd.setTextColor(WHITE);
+  initButtons();
+  M5.Lcd.setTextColor(TFT_WHITE);
   M5.Lcd.setTextSize(3);
   M5.Lcd.setCursor(0, 40);
   startupScreen(SW_VERSION);
+  delay(1000);
   //spaceCapacity = get_space_capacity();
- 
-  BLE_counter.init(true, blue_interval, blue_window, blue_distance_max, blue_distance_min, blue_scan_time, blue_window);
+
+  BLE_counter.init(true, blue_interval, blue_window, blue_distance_max, blue_distance_min, blue_scan_time, blue_window, calibrateRssi);
 #elif defined(DEVICE_HW_AQM) //Air Quality
   Serial1.begin(9600)
       Serial.println("Device Mode: Occupancy Trakcer");
 #endif
 
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
+  //WiFi.begin(ESP_wifiManager.WiFi_SSID(), ESP_wifiManager.WiFi_Pass())
+
+  wm_setup(false); //Start WifiManager
 
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -99,28 +105,28 @@ void loop()
   //Based on data frequency, send the data
   //data_frequency
   //Send Diagnostics data every 1 minute seconds
-  if (currentMillis - previousDataMillis >= data_frequency * 1000)
+  if (currentMillis - previousDataMillis >= data_frequency * 1000 || newRun == true)
   {
     dataLoopsPM++;
     previousDataMillis = currentMillis;
 
 #if defined(DEVICE_HW_OCC) //Occupancy Counter
-    int d = 0;
-    int t = 0;
-    BLE_counter.get_count(t, d);
-    send_mqtt_int("data/occp", d, false);
-    send_mqtt_int("data/totl", t, false);
+    int occup = 0;
+    int totl = 0;
+    BLE_counter.get_count(totl, occup);
+    send_mqtt_int("data/occp", occup, false);
+    send_mqtt_int("data/totl", totl, false);
 
     int ocolor = 0;
-    if (t >= spaceRed)
+    if (occup >= spaceRed)
       ocolor = 3;
-    else if (t >= spaceYellow)
+    else if (occup >= spaceYellow)
       ocolor = 2;
-    else if (t >= spaceGreen)
+    else if (occup >= spaceGreen)
       ocolor = 1;
     else
       ocolor = 0;
-    display_occupancy(t, ocolor);
+    display_occupancy(occup, ocolor);
 #elif defined(DEVICE_HW_AQM) //Air Quality
     send_mqtt_int("data/pm1.0", PM01Value, false);
     send_mqtt_int("data/pm2.5", PM2_5Value, false);
@@ -138,4 +144,25 @@ void loop()
   }
 
   mqttclient.loop();
+  newRun = false;
+
+  if (buttonhome.pressed)
+  {
+    buttonhome.pressed = false;
+  }
+
+  if (buttonside.pressed)
+  {
+    buttonside.pressed = false;
+  }
+
+  if (buttonside.numberKeyPresses >= 10)
+  { 
+   // wm_loop(true);
+    wm_loop(true); //Start WifiManagre
+    buttonside.numberKeyPresses = 0;
+  }
+  
+  wm_loop(false);
+
 }

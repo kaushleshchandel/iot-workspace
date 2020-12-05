@@ -7,9 +7,6 @@ int PM2_5Value = 0; //define PM2.5 value of the air detector module
 int PM10Value = 0;  //define PM10 value of the air detector module
 int voc_value = 0;  //VOC Sensor
 
-const char *ssid = DEFAULT_SSID;
-const char *password = DEFAULT_WIFI_PWD;
-//Device Configurations
 
 /*********************************************************/
 /* SAVED CONFIGURATIONS*/
@@ -25,7 +22,7 @@ int blue_interval = DEFAULT_BLUE_INTERVAL;
 bool blue_active_scan = DEFAULT_ACTIVE_SCAN;
 int blue_window = DEFAULT_BLUE_WINDOW;
 int scan_zone = DEFAULT_SCAN_ZONE_SIZE;
-int calibrationRssi = DEFAULT_CALIBRATION_RSSI;
+int calibrateRssi = DEFAULT_CALIBRATION_RSSI;
 
 int spaceCapacity = DEFAULT_SPACE_CAPACITY;
 int spaceThreshold = DEFAULT_SPACE_THRESHOLD;
@@ -72,7 +69,7 @@ int scantimeAddr = 70;
 int scanIntervalAddr = 80;
 int scanWindowAddr = 90;
 //int scanWindowAddr = 100;
-int calibrationRssiAddr = 110;
+int calibrateRssiAddr = 110;
 int activeScanAddr = 120;
 int maxDistanceAddr = 130;
 int minDistanceAddr = 140;
@@ -175,7 +172,7 @@ void save_config()
     eeWriteInt(spaceGreenAddr, spaceGreen);
     eeWriteInt(spaceRedAddr, spaceRed);
     eeWriteInt(spaceThresholdAddr, spaceThreshold);
-    eeWriteInt(calibrationRssiAddr, calibrationRssi);
+    eeWriteInt(calibrateRssiAddr, calibrateRssi);
 }
 
 void set_default_config()
@@ -212,7 +209,7 @@ bool read_config()
    Serial.print("Green     ");  spaceGreen = eeGetInt(spaceGreenAddr);
    Serial.print("Red       ");  spaceRed = eeGetInt(spaceRedAddr);
    Serial.print("Threshold ");  spaceThreshold = eeGetInt(spaceThresholdAddr);
-   Serial.print("Cali RSSI ");  calibrationRssi = eeGetInt(calibrationRssiAddr);
+   Serial.print("Cali RSSI ");  calibrateRssi = eeGetInt(calibrateRssiAddr);
    Serial.print("Active Scn ");  blue_active_scan = eeGetInt(activeScanAddr);
    Serial.print("Max Dist  ");  blue_distance_max = eeGetInt(maxDistanceAddr);
    Serial.print("Min Dist  ");  blue_distance_min = eeGetInt(minDistanceAddr);

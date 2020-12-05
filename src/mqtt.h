@@ -132,7 +132,7 @@ void sendConfig()
     send_mqtt_int("config/scanTime", blue_scan_time, false);
     send_mqtt_int("config/scanInterval", blue_interval, false);
     send_mqtt_int("config/scanWindow", blue_window, false);
-    send_mqtt_int("config/calibrationRssi", calibrationRssi, false);
+    send_mqtt_int("config/calibrateRssi", calibrateRssi, false);
     send_mqtt_int("config/activeScan", blue_active_scan, false);
     send_mqtt_int("config/maxDistance", blue_distance_max, false);
     send_mqtt_int("config/minDistance", blue_distance_min, false);
@@ -159,99 +159,104 @@ void callback(char *topic, byte *message, unsigned int length)
     Serial.println();
 
     String topicroot = get_beacon_id();
+    String cmd = String(topic);    
+
+    cmd = cmd.substring(17);
+
     topicroot += "/set/";
+    Serial.println(cmd);
 
     bool iscommandvalid = true;
 
     //FREQUENCY OF DATA SENDING
-    if (String(topic) == topicroot + "dataFrequency")
+    if (cmd == "dataFrequency")
     {
         Serial.print("Changing Frequency to ");
         data_frequency = messageTemp.toInt();
     }
 
-    else if (String(topic) == topicroot + "calibrationRssi")
+    else if (cmd ==  "calibrateRssi")
     {
         Serial.print("Changing RSSI Calibration");
-        calibrationRssi = messageTemp.toInt();
+        calibrateRssi = messageTemp.toInt();
     }
 
     // DO AN OTA BASED ON PASSED FIRMWARE
-    else if (String(topic) == topicroot + "ota")
+    else if (cmd ==  "ota")
     {
         Serial.print("Custom Firmware update");
         updateFirmware(messageTemp);
     }
 
-    else if (String(topic) == topicroot + "restart" || String(topic) == topicroot + "reboot")
+    else if (cmd == "restart" || cmd ==  "reboot")
     {
         Serial.print("Rebooting by mqtt");
         ESP.restart();
     }
 
-    else if (String(topic) == topicroot + "timeZone")
+    else if (cmd ==  "timeZone")
     {
         Serial.print("Change the time Zone");
         timeZone = messageTemp.toInt();
     }
 
-    else if (String(topic) == topicroot + "maxDistance")
+    else if (cmd ==  "maxDistance")
     {
         Serial.print("Change the max Distance");
         blue_distance_max = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "minDistance")
+    else if (cmd == "minDistance")
     {
         Serial.print("Change the min Distance");
         blue_distance_min = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "scanTime")
+    else if (cmd ==  "scanTime")
     {
         Serial.print("Change Scan Time");
         blue_scan_time = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "scanWindow")
+    else if (cmd == "scanWindow")
     {
         Serial.print("Change Scan Window");
         blue_window = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "scanInterval")
+    else if (cmd == "scanInterval")
     {
         Serial.print("Change Scan Interval");
         blue_interval = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "activeScan")
+    else if (cmd ==  "activeScan")
     {
         Serial.print("Change ActiveScan");
         blue_active_scan = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "spaceCapacity")
+    else if (cmd ==  "spaceCapacity")
     {
         Serial.print("Change spaceCapacity");
         spaceCapacity = messageTemp.toInt();
          
     }
-    else if (String(topic) == topicroot + "spaceThreshold")
+    else if (cmd == "spaceThreshold")
     {
         Serial.print("Change spaceThreshold");
         spaceThreshold = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "spaceYellow")
+    else if (cmd ==  "spaceYellow")
     {
         Serial.print("Change spaceYellow");
         spaceYellow = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "spaceRed")
+    else if (cmd ==  "spaceRed")
     {
         Serial.print("Change spaceRed");
         spaceRed = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "spaceGreen")
+    else if (cmd ==  "spaceGreen")
     {
         Serial.print("Change spaceGreen");
         spaceGreen = messageTemp.toInt();
     }
-    else if (String(topic) == topicroot + "setDefaults" || String(topic) == topicroot + "factoryreset")
+    else if (cmd ==  "setDefaults" || cmd ==  "factoryreset")
     {
         Serial.print("Setting defaults");
         set_default_config();
@@ -361,7 +366,6 @@ void reconnect()
     String sbeacon_id = get_beacon_id();
     String swilltopic = sbeacon_id;
 
-    char tempStringSubsTopic[50];
     char tempStringWillTopic[50];
     char tempStringclientID[50];
 
